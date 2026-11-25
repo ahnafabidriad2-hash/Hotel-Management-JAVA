@@ -1,0 +1,2 @@
+Customer ID: 101, Name: Rahim, Room Number: 101, Mobile: 01700000001, Email: rahim@example.com, Payment: 3000, AC Type: ac
+Customer ID: 102, Name: Karim, Room Number: 202, Mobile: 01700000002, Email: karim@example.com, Payment: 5000, AC Type: non-ac

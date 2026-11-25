@@ -1,0 +1,2 @@
+Guest Name: Rahim, Mobile Number: 01700000001, Room Number: 101, Room Type: Single, Check-In: 2025-01-02, Check-Out: 2025-01-05
+Guest Name: Karim, Mobile Number: 01700000002, Room Number: 202, Room Type: Double, Check-In: 2025-02-01, Check-Out: 2025-02-03

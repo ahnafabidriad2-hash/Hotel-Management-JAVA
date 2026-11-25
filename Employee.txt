@@ -1,0 +1,2 @@
+Name: Sumon, Position: Manager, Salary: 30000
+Name: Nadia, Position: Receptionist, Salary: 18000

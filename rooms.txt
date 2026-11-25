@@ -1,0 +1,2 @@
+Room Number: 101, Price: 3000, Customer: Rahim, AC Type: ac
+Room Number: 202, Price: 5000, Customer: no, AC Type: non-ac

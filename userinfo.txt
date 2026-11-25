@@ -1,0 +1,11 @@
+User Id: 1
+Name: Demo User
+Email: demo@example.com
+Phone: 01700000000
+Gender: Male
+Age: 22
+Address: Dhaka
+Pet Name: demo
+Birthdate: 01-01-2000
+Password: 1234
+-------------------------------------------

@@ -1,0 +1,2 @@
+Name: Sumon, Employee ID: 1, Position: Manager, Contact: 01700000010, Salary: 30000, Age: 35
+Name: Nadia, Employee ID: 2, Position: Receptionist, Contact: 01700000011, Salary: 18000, Age: 26
