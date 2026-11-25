@@ -135,6 +135,12 @@ public class Customer extends Person {
             String payment = paymentField.getText();
             String acType = acTypeField.getText();
 
+            // payment number na hole pore total hishab e crash korto, tai ekhanei atkai
+            if (!payment.isEmpty() && !Validate.isAmount(payment)) {
+                JOptionPane.showMessageDialog(frame, "Payment must be a number.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             if (customerId.isEmpty() || name.isEmpty() || roomNumber.isEmpty() || mobile.isEmpty() || email.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "All fields are required!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -242,7 +248,7 @@ public class Customer extends Person {
                 for (String detail : details) {
                     if (detail.trim().startsWith("Payment:")) {
                         String paymentStr = detail.split(":")[1].trim();
-                        totalMoney += Double.parseDouble(paymentStr);
+                        totalMoney += Validate.parseAmount(paymentStr);
                     }
                 }
             }

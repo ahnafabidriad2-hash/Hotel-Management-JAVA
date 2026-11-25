@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.util.Map;
 
 public class Login{
 
@@ -108,49 +108,28 @@ public class Login{
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String userId = userIdText.getText();
+                String userId = userIdText.getText().trim();
                 String password = new String(passwordText.getPassword());
 
-                boolean loginSuccess = false;
-
-                try (BufferedReader reader = new BufferedReader(new FileReader("userinfo.txt"))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        if (line.startsWith("User Id: ")) {
-                            String storedUserId = line.substring(8).trim();
-                            reader.readLine(); 
-                            reader.readLine();
-                            reader.readLine(); 
-                            reader.readLine(); 
-                            reader.readLine(); 
-                            reader.readLine();
-                            reader.readLine(); 
-                            reader.readLine(); 
-                            String storedPasswordLine = reader.readLine();
-
-                            if (storedUserId.equals(userId)) {
-                                String storedPassword = storedPasswordLine.substring(10).trim();
-                                if (storedPassword.equals(password)) {
-                                    loginSuccess = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                if (userId.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(frame, "Please enter User ID and Password", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
 
-                if (loginSuccess) {
-    JOptionPane.showMessageDialog(frame, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-    frame.dispose(); 
-    CustomerDashboard dashboard = new CustomerDashboard(); 
-    dashboard.createDashboardPage(); 
-} else {
-    JOptionPane.showMessageDialog(frame, "Invalid User ID or Password", "Error", JOptionPane.ERROR_MESSAGE);
-}
-   }
+                // line gune gune na pore, UserStore theke user er record niye password mila
+                Map<String, String> user = UserStore.find(userId);
+                if (user != null && password.equals(user.get("Password"))) {
+                    Session.userId = userId;
+                    frame.dispose();
+                    new CustomerDashboard().createDashboardPage();
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Invalid User ID or Password", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
         });
+
+        // password e enter chaple o login hobe
+        passwordText.addActionListener(e -> loginButton.doClick());
   
         frame.getContentPane().add(panel);
         frame.setVisible(true);

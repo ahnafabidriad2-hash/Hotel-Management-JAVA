@@ -131,6 +131,15 @@ public class Employee extends Person {
 
         int option = JOptionPane.showConfirmDialog(frame, panel, "Add Employee", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
+            // naam faka ba salary number na hole save kori na
+            if (nameField.getText().trim().isEmpty() || idField.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Name and Employee ID are required!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (!Validate.isAmount(salaryField.getText())) {
+                JOptionPane.showMessageDialog(frame, "Salary must be a number.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("employees.txt", true))) {
                 writer.write("Name: " + nameField.getText() + ", Employee ID: " + idField.getText() + ", Position: " + positionField.getText() + ", Contact: " + contactField.getText() + ", Salary: " + salaryField.getText() + ", Age: " + ageField.getText() + "\n");
             } catch (IOException e) {
@@ -243,7 +252,7 @@ public class Employee extends Person {
                 for (String part : parts) {
                     if (part.trim().startsWith("Salary:")) {
                         String salaryStr = part.split(":")[1].trim();
-                        totalSalary += Double.parseDouble(salaryStr);
+                        totalSalary += Validate.parseAmount(salaryStr);
                     }
                 }
             }

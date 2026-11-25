@@ -74,6 +74,7 @@ public class ManagerLogin {
             @Override
             public void actionPerformed(ActionEvent e) {
                 frame.dispose();
+                Login.main(null); // age shudhu bondho hoto, ekhon login page e fire jay
             }
         });
 

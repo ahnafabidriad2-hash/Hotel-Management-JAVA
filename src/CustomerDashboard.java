@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 
 public class CustomerDashboard extends JFrame {
     public static void main(String[] args) {
@@ -23,24 +24,18 @@ public class CustomerDashboard extends JFrame {
         panel.setBounds(0, 0, 600, 400);  // Full size of the JFrame
         add(panel);  // Add panel to the frame
 
-        JLabel profilePicLabel = new JLabel("Profile Picture (Upload):");
-        profilePicLabel.setBounds(50, 20, 150, 25);
-        panel.add(profilePicLabel);
+        // kaj na kora search box ar "coming soon" button er jaygay ke login kore ase seta dekhai
+        Map<String, String> user = Session.userId == null ? null : UserStore.find(Session.userId);
+        String name = user == null ? "Guest" : user.get("Name");
 
-        JButton uploadButton = new JButton("Upload Picture");
-        uploadButton.setBounds(200, 20, 150, 25);
-        panel.add(uploadButton);
+        JLabel welcomeLabel = new JLabel("Welcome, " + name + "!");
+        welcomeLabel.setFont(new Font("Serif", Font.BOLD, 22));
+        welcomeLabel.setBounds(50, 30, 450, 35);
+        panel.add(welcomeLabel);
 
-        uploadButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(CustomerDashboard.this, "Feature coming soon!", "Info", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-
-        JTextField searchBox = new JTextField("Search...");
-        searchBox.setBounds(50, 60, 300, 30);
-        panel.add(searchBox);
+        JLabel infoLabel = new JLabel("What would you like to do today?");
+        infoLabel.setBounds(50, 70, 300, 25);
+        panel.add(infoLabel);
 
         JButton profileButton = new JButton("Profile");
         profileButton.setBounds(50, 120, 200, 40);
@@ -89,10 +84,10 @@ public class CustomerDashboard extends JFrame {
         logoutButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(CustomerDashboard.this, "Logging out...", "Logout", JOptionPane.INFORMATION_MESSAGE);
-                dispose();  // Close the current frame
-                // Create a new instance of CustomerDashboard when logging out
-                new CustomerDashboard().createDashboardPage();  // Re-launch the dashboard
+                // age logout korle abar dashboard e chole ashto, ekhon login page e jay
+                Session.logout();
+                dispose();
+                Login.main(null);
             }
         });
 

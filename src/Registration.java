@@ -3,6 +3,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 class Registration {
     public Registration() {
@@ -133,24 +135,49 @@ class Registration {
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter("userinfo.txt", true))) {
-                    String gender = maleButton.isSelected() ? "Male" : femaleButton.isSelected() ? "Female" : "Prefer not to say";
+                String userId = userIdText.getText().trim();
+                String password = new String(passwordText.getPassword());
 
-                    writer.write("User Id: " + userIdText.getText() + "\n");
-                    writer.write("Name: " + nameText.getText() + "\n");
-                    writer.write("Email: " + emailText.getText() + "\n");
-                    writer.write("Phone: " + phoneText.getText() + "\n");
-                    writer.write("Gender: " + gender + "\n");
-                    writer.write("Age: " + ageText.getText() + "\n");
-                    writer.write("Address: " + addressText.getText() + "\n");
-                    writer.write("Pet Name: " + petNameText.getText() + "\n");
-                    writer.write("Birthdate: " + birthdateText.getText() + "\n");
-                    writer.write("Password: " + new String(passwordText.getPassword()) + "\n");
-                    writer.write("-------------------------------------------\n");
+                // save korar age sob check, kono vul thakle message dekhiye fire jai
+                String error = null;
+                if (userId.isEmpty() || nameText.getText().trim().isEmpty() || password.isEmpty()
+                        || petNameText.getText().trim().isEmpty()) {
+                    error = "User Id, Name, Pet Name and Password are required.";
+                } else if (UserStore.exists(userId)) {
+                    error = "This User Id is already taken. Choose another one.";
+                } else if (!emailText.getText().trim().isEmpty() && !Validate.isEmail(emailText.getText().trim())) {
+                    error = "Please enter a valid email.";
+                } else if (!Validate.isPhone(phoneText.getText().trim())) {
+                    error = "Phone number must be 11 digits and start with 01.";
+                } else if (!Validate.isWholeNumber(ageText.getText(), 1, 120)) {
+                    error = "Please enter a valid age.";
+                } else if (password.length() < 4) {
+                    error = "Password must be at least 4 characters.";
+                }
+                if (error != null) {
+                    JOptionPane.showMessageDialog(frame, error, "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
-                    JOptionPane.showMessageDialog(frame, "Data saved successfully!");
+                String gender = maleButton.isSelected() ? "Male" : femaleButton.isSelected() ? "Female" : "Prefer not to say";
+                Map<String, String> user = new LinkedHashMap<>();
+                user.put("User Id", userId);
+                user.put("Name", nameText.getText().trim());
+                user.put("Email", emailText.getText().trim());
+                user.put("Phone", phoneText.getText().trim());
+                user.put("Gender", gender);
+                user.put("Age", ageText.getText().trim());
+                user.put("Address", addressText.getText().trim());
+                user.put("Pet Name", petNameText.getText().trim());
+                user.put("Birthdate", birthdateText.getText().trim());
+                user.put("Password", password);
+
+                try {
+                    UserStore.add(user);
+                    JOptionPane.showMessageDialog(frame, "Registration successful! You can now log in with User Id " + userId + ".");
+                    frame.dispose();
                 } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    JOptionPane.showMessageDialog(frame, "Could not save your data.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });

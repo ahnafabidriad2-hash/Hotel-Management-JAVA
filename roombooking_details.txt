@@ -1,0 +1,1 @@
+User Id: 1, Room Type: Double, Check-In: 2025-12-20, Check-Out: 2025-12-23, Nights: 3, Guests: 3, Total: 15000

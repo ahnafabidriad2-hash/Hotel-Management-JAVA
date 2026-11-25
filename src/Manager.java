@@ -81,6 +81,7 @@ public class Manager {
             @Override
             public void actionPerformed(ActionEvent e) {
                 frame.dispose();
+                Login.main(null); // manager dashboard theke back = logout, login page e jay
             }
         });
 
@@ -228,6 +229,10 @@ public class Manager {
                 
                 if (name.isEmpty() || position.isEmpty() || salary.isEmpty()) {
                     JOptionPane.showMessageDialog(addEmployeeFrame, "All fields must be filled!");
+                    return;
+                }
+                if (!Validate.isAmount(salary)) {
+                    JOptionPane.showMessageDialog(addEmployeeFrame, "Salary must be a number!");
                     return;
                 }
     
@@ -535,15 +540,31 @@ public class Manager {
     reviewsLabel.setBounds(50, 70, 200, 30);
     panel.add(reviewsLabel);
     
-    String[] reviewsArray = {
-        "Review 1: Excellent service!",
-        "Review 2: Room was clean and comfortable.",
-        "Review 3: Food quality needs improvement."
-    };
-    
-    JComboBox<String> reviewsComboBox = new JComboBox<>(reviewsArray);
+    // age eikhane 3 ta banano review hardcode kora chilo, ekhon customer der asol review file theke ase
+    java.util.List<String> reviewsList = new java.util.ArrayList<>();
+    try (BufferedReader reader = new BufferedReader(new FileReader(BookingHistoryGUI.REVIEW_FILE))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (!line.isBlank()) reviewsList.add(line);
+        }
+    } catch (IOException ex) {
+        // file na thakle kono review nai
+    }
+    if (reviewsList.isEmpty()) reviewsList.add("No reviews yet");
+
+    JComboBox<String> reviewsComboBox = new JComboBox<>(reviewsList.toArray(new String[0]));
     reviewsComboBox.setBounds(50, 110, 350, 30);
     panel.add(reviewsComboBox);
+
+    // lomba review combo box e kete jay, tai select kora review ta niche puro dekhai
+    JTextArea selectedReviewArea = new JTextArea((String) reviewsComboBox.getSelectedItem());
+    selectedReviewArea.setEditable(false);
+    selectedReviewArea.setLineWrap(true);
+    selectedReviewArea.setWrapStyleWord(true);
+    JScrollPane selectedReviewScroll = new JScrollPane(selectedReviewArea);
+    selectedReviewScroll.setBounds(50, 150, 350, 110);
+    panel.add(selectedReviewScroll);
+    reviewsComboBox.addActionListener(ev -> selectedReviewArea.setText((String) reviewsComboBox.getSelectedItem()));
     
     JLabel feedbackLabel = new JLabel("Send Feedback:");
     feedbackLabel.setFont(new Font("Arial", Font.BOLD, 18));

@@ -170,6 +170,10 @@ public class Room {
                 JOptionPane.showMessageDialog(frame, "Room Number and Price are required!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            if (!Validate.isAmount(price)) {
+                JOptionPane.showMessageDialog(frame, "Price must be a number.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             try (BufferedWriter writer = new BufferedWriter(new FileWriter("rooms.txt", true))) {
                 writer.write("Room Number: " + roomNumber + ", Price: " + price + ", Customer: " + customerName + ", AC Type: " + acType + "\n");

@@ -36,7 +36,8 @@ public class Revenue {
         totalIncomeField.setEditable(false);
         totalIncomeField.setBackground(new Color(19, 27, 104)); 
         totalIncomeField.setForeground(Color.WHITE);
-        totalIncomeField.setText("BDT " + getTotalIncome());
+        double income = getTotalIncome();
+        totalIncomeField.setText("BDT " + income);
 
         
         JLabel totalSalaryLabel = new JLabel("TOTAL SALARY:");
@@ -55,7 +56,7 @@ public class Revenue {
         revenueField.setBackground(new Color(19, 27, 104)); 
         revenueField.setForeground(Color.WHITE);
 
-        double revenue = getTotalIncome() - getTotalSalary();
+        double revenue = income - getTotalSalary();
         if (revenue > 0) {
             revenueField.setText("BDT " + revenue + " - PROFIT TIME");
         } else if (revenue < 0) {
@@ -114,12 +115,22 @@ public class Revenue {
                 for (String part : parts) {
                     if (part.trim().startsWith("Payment:")) {
                         String paymentStr = part.split(":")[1].trim();
-                        totalIncome += Double.parseDouble(paymentStr);
+                        totalIncome += Validate.parseAmount(paymentStr);
                     }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        // customer der online room booking er taka o income e jog hoy
+        try (BufferedReader br = new BufferedReader(new FileReader(RoomBookingGUI.BOOKING_FILE))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                int i = line.lastIndexOf("Total:");
+                if (i >= 0) totalIncome += Validate.parseAmount(line.substring(i + 6));
+            }
+        } catch (IOException e) {
+            // ekhono kono online booking nai
         }
         return totalIncome;
     }
@@ -134,7 +145,7 @@ public class Revenue {
                 for (String part : parts) {
                     if (part.trim().startsWith("Salary:")) {
                         String salaryStr = part.split(":")[1].trim();
-                        totalSalary += Double.parseDouble(salaryStr);
+                        totalSalary += Validate.parseAmount(salaryStr);
                     }
                 }
             }

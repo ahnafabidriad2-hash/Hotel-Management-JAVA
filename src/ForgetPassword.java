@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.Map;
 
 public class ForgetPassword extends JFrame {
     private JTextField userIdField, petNameField;
@@ -42,22 +43,33 @@ public class ForgetPassword extends JFrame {
         panel.add(verifyButton);
 
         
+        // message ta age confirm button er upore porto, tai niche namano holo
         messageLabel = new JLabel();
-        messageLabel.setBounds(50, 220, 400, 30);
+        messageLabel.setBounds(50, 260, 450, 30);
         panel.add(messageLabel);
 
-        
+
         JButton confirmButton = new JButton("Confirm");
         confirmButton.setBounds(150, 220, 100, 30);
-        confirmButton.setEnabled(false); 
+        confirmButton.setEnabled(false);
         panel.add(confirmButton);
+
+        JButton backButton = new JButton("Back");
+        backButton.setBounds(450, 300, 100, 30);
+        backButton.setBackground(Color.RED);
+        backButton.setForeground(Color.WHITE);
+        panel.add(backButton);
+        backButton.addActionListener(e -> {
+            dispose();
+            Login.main(null);
+        });
 
        
         verifyButton.addActionListener(e -> {
-            String userId = userIdField.getText();
-            String petName = petNameField.getText();
+            String userId = userIdField.getText().trim();
+            String petName = petNameField.getText().trim();
 
-            
+
             if (verifyUserIdAndPetName(userId, petName)) {
                 messageLabel.setText("User verified. Enter new password.");
                 confirmButton.setEnabled(true); 
@@ -70,8 +82,13 @@ public class ForgetPassword extends JFrame {
         
         confirmButton.addActionListener(e -> {
             String newPassword = new String(newPasswordField.getPassword());
-            String userId = userIdField.getText();
-            String petName = petNameField.getText();
+            String userId = userIdField.getText().trim();
+            String petName = petNameField.getText().trim();
+
+            if (newPassword.length() < 4) {
+                messageLabel.setText("New password must be at least 4 characters.");
+                return;
+            }
 
             
             boolean isMatched = updatePasswordIfValid(userId, petName, newPassword);
@@ -95,55 +112,24 @@ public class ForgetPassword extends JFrame {
     }
 
     
+    // age User Id er porer line take pet name dhorto, kintu oita asole Name line,
+    // tai kokhono match korto na. ekhon field er naam diye thik value ta nei
     private boolean verifyUserIdAndPetName(String userId, String petName) {
-        try (BufferedReader reader = new BufferedReader(new FileReader("userinfo.txt"))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith("User Id: " + userId)) {
-                    String storedPetName = reader.readLine().substring(10).trim();
-                    if (storedPetName.equals(petName)) {
-                        return true; 
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
+        Map<String, String> user = UserStore.find(userId);
+        return user != null && petName.equalsIgnoreCase(user.get("Pet Name"));
     }
 
-    
+    // age notun Password line jog hoto ar purono ta theke jeto, ekhon purono tai replace hoy
     private boolean updatePasswordIfValid(String userId, String petName, String newPassword) {
+        if (!verifyUserIdAndPetName(userId, petName)) return false;
+        Map<String, String> user = UserStore.find(userId);
+        user.put("Password", newPassword);
         try {
-            StringBuilder fileContent = new StringBuilder();
-            boolean isMatched = false;
-            try (BufferedReader reader = new BufferedReader(new FileReader("userinfo.txt"))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    fileContent.append(line).append("\n");
-                    if (line.startsWith("User Id: " + userId)) {
-                        String storedPetName = reader.readLine().substring(10).trim();
-                        if (storedPetName.equals(petName)) {
-                            isMatched = true;
-                            
-                            for (int i = 0; i > 0; i++) reader.readLine();
-                            fileContent.append("Password: ").append(newPassword).append("\n");
-                        }
-                    }
-                }
-            }
-
-            
-            if (isMatched) {
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter("userinfo.txt"))) {
-                    writer.write(fileContent.toString());
-                }
-            }
-            return isMatched;
+            UserStore.update(user);
+            return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
     public static void main(String[] args) {

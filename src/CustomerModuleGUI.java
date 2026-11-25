@@ -1,144 +1,64 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.Map;
 
+// profile page. age eita abar notun kore naam/email chaito ar update kichui save korto na,
+// ekhon je login kore ase tar asol info userinfo.txt theke dekhay ar update korle save hoy
 public class CustomerModuleGUI {
-    private String userName = "";
-    private String userEmail = "";
-    private String userPassword = "";
-    private String userPhone = "";
-    private String userAddress = "";
+    private Map<String, String> user;
 
     public CustomerModuleGUI() {
-        createLoginPage();  // Start by showing the login page
-    }
-
-    private void createLoginPage() {
-        JFrame loginFrame = new JFrame("Profile Login");
-        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        loginFrame.setSize(400, 300);
-
-        JPanel panel = new JPanel();
-        panel.setLayout(null);
-        loginFrame.add(panel);
-
-        JLabel nameLabel = new JLabel("Name:");
-        nameLabel.setBounds(50, 20, 80, 25);
-        panel.add(nameLabel);
-
-        JTextField nameText = new JTextField(20);
-        nameText.setBounds(150, 20, 160, 25);
-        panel.add(nameText);
-
-        JLabel emailLabel = new JLabel("Email:");
-        emailLabel.setBounds(50, 60, 80, 25);
-        panel.add(emailLabel);
-
-        JTextField emailText = new JTextField(20);
-        emailText.setBounds(150, 60, 160, 25);
-        panel.add(emailText);
-
-        JLabel passwordLabel = new JLabel("Password:");
-        passwordLabel.setBounds(50, 100, 80, 25);
-        panel.add(passwordLabel);
-
-        JPasswordField passwordText = new JPasswordField(20);
-        passwordText.setBounds(150, 100, 160, 25);
-        panel.add(passwordText);
-
-        JButton loginButton = new JButton("OK");
-        loginButton.setBounds(150, 150, 80, 25);
-        panel.add(loginButton);
-
-        JButton backButton = new JButton("Back to Homepage");
-        backButton.setBounds(120, 200, 160, 25);
-        panel.add(backButton);
-
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                userName = nameText.getText();
-                userEmail = emailText.getText();
-                userPassword = new String(passwordText.getPassword());
-                loginFrame.dispose();
-                createProfileDashboard();
-            }
-        });
-
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loginFrame.dispose();  // Close the login frame
-                new CustomerDashboard().createDashboardPage();  // Go back to the dashboard
-            }
-        });
-
-        loginFrame.setVisible(true);
+        user = Session.userId == null ? null : UserStore.find(Session.userId);
+        if (user == null) {
+            JOptionPane.showMessageDialog(null, "Please log in first.", "Error", JOptionPane.ERROR_MESSAGE);
+            Login.main(null);
+            return;
+        }
+        createProfileDashboard();
     }
 
     private void createProfileDashboard() {
-        JFrame profileFrame = new JFrame("Profile Dashboard");
+        JFrame profileFrame = new JFrame("My Profile");
         profileFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        profileFrame.setSize(400, 300);
+        profileFrame.setSize(450, 420);
+        profileFrame.setLocationRelativeTo(null);
 
         JPanel panel = new JPanel();
         panel.setLayout(null);
         profileFrame.add(panel);
 
-        JLabel nameLabel = new JLabel("Name: " + userName);
-        nameLabel.setBounds(50, 50, 300, 30);
-        panel.add(nameLabel);
+        JLabel titleLabel = new JLabel("My Profile");
+        titleLabel.setFont(new Font("Serif", Font.BOLD, 22));
+        titleLabel.setBounds(50, 15, 300, 30);
+        panel.add(titleLabel);
 
-        JLabel emailLabel = new JLabel("Email: " + userEmail);
-        emailLabel.setBounds(50, 80, 300, 30);
-        panel.add(emailLabel);
+        // password chara baki sob field dekhai
+        String[] shown = {"User Id", "Name", "Email", "Phone", "Gender", "Age", "Address", "Birthdate"};
+        int y = 60;
+        for (String field : shown) {
+            JLabel label = new JLabel(field + ":  " + user.getOrDefault(field, ""));
+            label.setBounds(50, y, 350, 25);
+            panel.add(label);
+            y += 28;
+        }
 
         JButton updateProfileButton = new JButton("Update Profile");
-        updateProfileButton.setBounds(50, 120, 150, 30);
+        updateProfileButton.setBounds(50, y + 15, 150, 30);
         panel.add(updateProfileButton);
 
-        JButton viewProfileButton = new JButton("View Profile");
-        viewProfileButton.setBounds(220, 120, 150, 30);
-        panel.add(viewProfileButton);
-
-        JButton logoutButton = new JButton("Logout");
-        logoutButton.setBounds(50, 160, 150, 30);
-        panel.add(logoutButton);
-
         JButton backButton = new JButton("Back to Homepage");
-        backButton.setBounds(220, 160, 150, 30);
+        backButton.setBounds(220, y + 15, 160, 30);
         panel.add(backButton);
 
-        updateProfileButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                profileFrame.dispose();
-                createUpdateProfilePage();
-            }
+        updateProfileButton.addActionListener(e -> {
+            profileFrame.dispose();
+            createUpdateProfilePage();
         });
 
-        viewProfileButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(profileFrame, "Name: " + userName + "\nEmail: " + userEmail + "\nPhone: " + userPhone + "\nAddress: " + userAddress, "Profile Details", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
-
-        logoutButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                profileFrame.dispose();
-                new CustomerDashboard().createDashboardPage();
-            }
-        });
-
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                profileFrame.dispose();
-                new CustomerDashboard().createDashboardPage();  // Return to dashboard
-            }
+        backButton.addActionListener(e -> {
+            profileFrame.dispose();
+            new CustomerDashboard().createDashboardPage();
         });
 
         profileFrame.setVisible(true);
@@ -147,75 +67,77 @@ public class CustomerModuleGUI {
     private void createUpdateProfilePage() {
         JFrame updateFrame = new JFrame("Update Profile");
         updateFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        updateFrame.setSize(400, 400);
+        updateFrame.setSize(400, 380);
+        updateFrame.setLocationRelativeTo(null);
 
         JPanel panel = new JPanel();
         panel.setLayout(null);
         updateFrame.add(panel);
 
-        JLabel nameLabel = new JLabel("Name:");
-        nameLabel.setBounds(50, 50, 100, 25);
-        panel.add(nameLabel);
+        JTextField nameText = addField(panel, "Name:", 50, user.get("Name"));
+        JTextField emailText = addField(panel, "Email:", 90, user.get("Email"));
+        JTextField phoneText = addField(panel, "Phone:", 130, user.get("Phone"));
+        JTextField addressText = addField(panel, "Address:", 170, user.get("Address"));
 
-        JTextField nameText = new JTextField(userName);
-        nameText.setBounds(150, 50, 160, 25);
-        panel.add(nameText);
-
-        JLabel emailLabel = new JLabel("Email:");
-        emailLabel.setBounds(50, 90, 100, 25);
-        panel.add(emailLabel);
-
-        JTextField emailText = new JTextField(userEmail);
-        emailText.setBounds(150, 90, 160, 25);
-        panel.add(emailText);
-
-        JLabel phoneLabel = new JLabel("Phone:");
-        phoneLabel.setBounds(50, 130, 100, 25);
-        panel.add(phoneLabel);
-
-        JTextField phoneText = new JTextField(userPhone);
-        phoneText.setBounds(150, 130, 160, 25);
-        panel.add(phoneText);
-
-        JLabel addressLabel = new JLabel("Address:");
-        addressLabel.setBounds(50, 170, 100, 25);
-        panel.add(addressLabel);
-
-        JTextField addressText = new JTextField(userAddress);
-        addressText.setBounds(150, 170, 160, 25);
-        panel.add(addressText);
-
-        JButton saveButton = new JButton("OK");
+        JButton saveButton = new JButton("Save");
         saveButton.setBounds(150, 220, 80, 30);
         panel.add(saveButton);
 
-        JButton backButton = new JButton("Back to Homepage");
-        backButton.setBounds(120, 270, 160, 30);
+        JButton backButton = new JButton("Back");
+        backButton.setBounds(150, 270, 80, 30);
         panel.add(backButton);
 
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                userName = nameText.getText();
-                userEmail = emailText.getText();
-                userPhone = phoneText.getText();
-                userAddress = addressText.getText();
+        saveButton.addActionListener(e -> {
+            String name = nameText.getText().trim();
+            String email = emailText.getText().trim();
+            String phone = phoneText.getText().trim();
+
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(updateFrame, "Name cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (!email.isEmpty() && !Validate.isEmail(email)) {
+                JOptionPane.showMessageDialog(updateFrame, "Please enter a valid email.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if (!Validate.isPhone(phone)) {
+                JOptionPane.showMessageDialog(updateFrame, "Phone number must be 11 digits and start with 01.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            user.put("Name", name);
+            user.put("Email", email);
+            user.put("Phone", phone);
+            user.put("Address", addressText.getText().trim());
+            try {
+                UserStore.update(user);
                 JOptionPane.showMessageDialog(updateFrame, "Profile Updated Successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                updateFrame.dispose();
+                createProfileDashboard();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(updateFrame, "Could not save your profile.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateFrame.dispose();
-                new CustomerDashboard().createDashboardPage();  // Return to dashboard
-            }
+        backButton.addActionListener(e -> {
+            updateFrame.dispose();
+            createProfileDashboard();
         });
 
         updateFrame.setVisible(true);
     }
+
+    private JTextField addField(JPanel panel, String labelText, int y, String value) {
+        JLabel label = new JLabel(labelText);
+        label.setBounds(50, y, 100, 25);
+        panel.add(label);
+        JTextField field = new JTextField(value == null ? "" : value);
+        field.setBounds(150, y, 180, 25);
+        panel.add(field);
+        return field;
+    }
+
     public static void main(String[] args) {
-        CustomerModuleGUI customerModule = new CustomerModuleGUI();
-        customerModule.createLoginPage();
+        new CustomerModuleGUI();
     }
 }

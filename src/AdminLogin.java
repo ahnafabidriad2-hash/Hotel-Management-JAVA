@@ -110,8 +110,9 @@ public class AdminLogin {
        
       backButton.addActionListener(new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-                
+        // age shudhu window bondho hoto, kichu khola thakto na
         frame.dispose();
+        Login.main(null);
             }
         });
 
