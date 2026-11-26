@@ -79,7 +79,7 @@ public class ManagerLogin {
         });
 
         
-        frame.setVisible(true);
+        UI.show(frame);
     }
 
     

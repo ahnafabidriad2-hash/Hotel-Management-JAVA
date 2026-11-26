@@ -88,7 +88,7 @@ public class Customer extends Person {
 
         
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        UI.show(frame);
     }
 
     private JButton createButton(String text) {
@@ -135,6 +135,10 @@ public class Customer extends Person {
             String payment = paymentField.getText();
             String acType = acTypeField.getText();
 
+            if (Validate.existsInFile("customers.txt", "Customer ID", customerId)) {
+                JOptionPane.showMessageDialog(frame, "Customer ID " + customerId + " already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             // payment number na hole pore total hishab e crash korto, tai ekhanei atkai
             if (!payment.isEmpty() && !Validate.isAmount(payment)) {
                 JOptionPane.showMessageDialog(frame, "Payment must be a number.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -161,6 +165,12 @@ public class Customer extends Person {
     public void deletePerson() {
         String customerId = JOptionPane.showInputDialog(frame, "Enter Customer ID to Delete:");
         if (customerId == null || customerId.trim().isEmpty()) return;
+        customerId = customerId.trim();
+        if (!Validate.existsInFile("customers.txt", "Customer ID", customerId)) {
+            JOptionPane.showMessageDialog(frame, "Customer not found.", "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (!Validate.confirm(frame, "customer " + customerId)) return;
 
         List<String> updatedCustomers = new ArrayList<>();
         boolean customerDeleted = false;
@@ -168,7 +178,7 @@ public class Customer extends Person {
         try (BufferedReader br = new BufferedReader(new FileReader("customers.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (!line.contains("Customer ID: " + customerId)) {
+                if (!Validate.fieldIs(line, "Customer ID", customerId)) { // thik oi ID, shuru mile na
                     updatedCustomers.add(line);
                 } else {
                     customerDeleted = true;

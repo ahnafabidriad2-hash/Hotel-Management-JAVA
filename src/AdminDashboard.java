@@ -32,7 +32,7 @@ public class AdminDashboard {
         employeeButton.setBounds(200, 220, 200, 40); 
         frame.add(employeeButton);
 
-        JButton revenueButton = createStyledButton("REVENUE REVENUE");
+        JButton revenueButton = createStyledButton("REVENUE");
         revenueButton.setBounds(200, 280, 200, 40); 
         frame.add(revenueButton);
 
@@ -57,7 +57,7 @@ public class AdminDashboard {
 
         
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        UI.show(frame);
     }
 
     

@@ -11,9 +11,17 @@ public class RoomBookingGUI {
     // protiti booking ek line e, kon user korse seta o thake jate history te shudhu nijer ta dekhay
     public static final String BOOKING_FILE = "roombooking_details.txt";
 
-    private static final String[] ROOM_TYPES = {"Single", "Double"};
+    public static final String[] ROOM_TYPES = {"Single", "Double"};
     private static final int[] PRICE_PER_NIGHT = {3000, 5000}; // BDT
     private static final int[] MAX_GUESTS = {2, 4};
+
+    // manager er walk-in booking o eki dam e hishab hoy, tai baire theke o pawa jay. vul type hole -1
+    public static int priceFor(String roomType) {
+        for (int i = 0; i < ROOM_TYPES.length; i++) {
+            if (ROOM_TYPES[i].equalsIgnoreCase(roomType.trim())) return PRICE_PER_NIGHT[i];
+        }
+        return -1;
+    }
 
     private JFrame bookingFrame, formFrame, paymentFrame;
     private int selectedRoom;
@@ -86,7 +94,7 @@ public class RoomBookingGUI {
             new CustomerDashboard().createDashboardPage();
         });
 
-        bookingFrame.setVisible(true);
+        UI.show(bookingFrame);
     }
 
     private void createBookingForm() {
@@ -164,10 +172,10 @@ public class RoomBookingGUI {
 
         backButton.addActionListener(e -> {
             formFrame.dispose();
-            bookingFrame.setVisible(true);
+            UI.show(bookingFrame);
         });
 
-        formFrame.setVisible(true);
+        UI.show(formFrame);
     }
 
     private void createPaymentPage() {
@@ -242,7 +250,7 @@ public class RoomBookingGUI {
 
         backButton.addActionListener(e -> {
             paymentFrame.dispose();
-            formFrame.setVisible(true);
+            UI.show(formFrame);
         });
 
         homeButton.addActionListener(e -> {
@@ -250,7 +258,7 @@ public class RoomBookingGUI {
             new CustomerDashboard().createDashboardPage();
         });
 
-        paymentFrame.setVisible(true);
+        UI.show(paymentFrame);
     }
 
     private boolean saveBookingDetails(long nights, long total) {

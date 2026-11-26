@@ -77,7 +77,7 @@ public class BookingHistoryGUI {
         });
         panel.add(backButton);
 
-        historyFrame.setVisible(true);
+        UI.show(historyFrame);
     }
 
     private void showReviewDialog() {
@@ -133,6 +133,6 @@ public class BookingHistoryGUI {
             reviewDialog.dispose();
         });
 
-        reviewDialog.setVisible(true);
+        UI.show(reviewDialog);
     }
 }

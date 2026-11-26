@@ -28,6 +28,42 @@ public class Validate {
         }
     }
 
+    // "Customer ID: 101, Name: Rahim, ..." line theke ekta field er puro value ber kore.
+    // age contains/startsWith diye mila hoto, tai "10" dile 101, 102 o mile jeto
+    public static String field(String line, String key) {
+        for (String part : line.split(",")) {
+            int colon = part.indexOf(':');
+            if (colon > 0 && part.substring(0, colon).trim().equalsIgnoreCase(key)) {
+                return part.substring(colon + 1).trim();
+            }
+        }
+        return null;
+    }
+
+    // file e oi ID age theke ase kina (ek ID duibar jate na hoy)
+    public static boolean existsInFile(String file, String key, String value) {
+        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (fieldIs(line, key, value)) return true;
+            }
+        } catch (java.io.IOException e) {
+            // file nai mane kichu nai
+        }
+        return false;
+    }
+
+    // delete korar age ekbar jiggesh kore nei
+    public static boolean confirm(java.awt.Component parent, String what) {
+        return javax.swing.JOptionPane.showConfirmDialog(parent, "Delete " + what + "? This cannot be undone.",
+                "Confirm Delete", javax.swing.JOptionPane.YES_NO_OPTION) == javax.swing.JOptionPane.YES_OPTION;
+    }
+
+    public static boolean fieldIs(String line, String key, String value) {
+        String v = field(line, key);
+        return v != null && v.equalsIgnoreCase(value.trim());
+    }
+
     // file er "Payment: 3000" er moto value pore, vul thakle 0 dhore crash thekay
     public static double parseAmount(String text) {
         try {

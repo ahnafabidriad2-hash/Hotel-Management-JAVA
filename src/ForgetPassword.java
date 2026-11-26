@@ -100,7 +100,7 @@ public class ForgetPassword extends JFrame {
             }
         });
 
-        setVisible(true);
+        UI.show(this);
     }
 
     private void addLabelAndField(JPanel panel, String labelText, int x, int y, JTextField field) {

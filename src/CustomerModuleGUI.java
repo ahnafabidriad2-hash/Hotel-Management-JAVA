@@ -61,7 +61,7 @@ public class CustomerModuleGUI {
             new CustomerDashboard().createDashboardPage();
         });
 
-        profileFrame.setVisible(true);
+        UI.show(profileFrame);
     }
 
     private void createUpdateProfilePage() {
@@ -124,7 +124,7 @@ public class CustomerModuleGUI {
             createProfileDashboard();
         });
 
-        updateFrame.setVisible(true);
+        UI.show(updateFrame);
     }
 
     private JTextField addField(JPanel panel, String labelText, int y, String value) {

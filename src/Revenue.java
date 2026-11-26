@@ -102,7 +102,7 @@ public class Revenue {
         });
 
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        UI.show(frame);
     }
 
     
@@ -122,15 +122,17 @@ public class Revenue {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // customer der online room booking er taka o income e jog hoy
-        try (BufferedReader br = new BufferedReader(new FileReader(RoomBookingGUI.BOOKING_FILE))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                int i = line.lastIndexOf("Total:");
-                if (i >= 0) totalIncome += Validate.parseAmount(line.substring(i + 6));
+        // customer der online booking ar manager er walk-in booking duitar takai income e jog hoy
+        for (String file : new String[]{RoomBookingGUI.BOOKING_FILE, "Booking.txt"}) {
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String total = Validate.field(line, "Total");
+                    if (total != null) totalIncome += Validate.parseAmount(total);
+                }
+            } catch (IOException e) {
+                // ei file e ekhono booking nai
             }
-        } catch (IOException e) {
-            // ekhono kono online booking nai
         }
         return totalIncome;
     }

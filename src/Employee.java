@@ -95,7 +95,7 @@ public class Employee extends Person {
         });
 
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        UI.show(frame);
     }
 
     private JButton createButton(String text) {
@@ -136,6 +136,10 @@ public class Employee extends Person {
                 JOptionPane.showMessageDialog(frame, "Name and Employee ID are required!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            if (Validate.existsInFile("employees.txt", "Employee ID", idField.getText().trim())) {
+                JOptionPane.showMessageDialog(frame, "Employee ID " + idField.getText().trim() + " already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             if (!Validate.isAmount(salaryField.getText())) {
                 JOptionPane.showMessageDialog(frame, "Salary must be a number.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -155,6 +159,12 @@ public class Employee extends Person {
     public void deletePerson() {
         String employeeId = JOptionPane.showInputDialog(frame, "Enter Employee ID to Delete:");
         if (employeeId == null || employeeId.trim().isEmpty()) return;
+        employeeId = employeeId.trim();
+        if (!Validate.existsInFile("employees.txt", "Employee ID", employeeId)) {
+            JOptionPane.showMessageDialog(frame, "Employee not found.", "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (!Validate.confirm(frame, "employee " + employeeId)) return;
 
         List<String> updatedEmployees = new ArrayList<>();
         boolean employeeDeleted = false;
@@ -162,7 +172,7 @@ public class Employee extends Person {
         try (BufferedReader br = new BufferedReader(new FileReader("employees.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (!line.contains("Employee ID: " + employeeId)) {  // Delete by Employee ID
+                if (!Validate.fieldIs(line, "Employee ID", employeeId)) { // thik oi ID, shuru mile na  // Delete by Employee ID
                     updatedEmployees.add(line);
                 } else {
                     employeeDeleted = true;

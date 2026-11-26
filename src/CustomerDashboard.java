@@ -91,6 +91,6 @@ public class CustomerDashboard extends JFrame {
             }
         });
 
-        setVisible(true);  // Make the dashboard visible
+        UI.show(this);  // Make the dashboard visible
     }
 }

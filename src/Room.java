@@ -93,7 +93,7 @@ public class Room {
 
         
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        UI.show(frame);
     }
 
     
@@ -123,12 +123,13 @@ public class Room {
     private void searchRoom() {
         String roomNumber = JOptionPane.showInputDialog(frame, "Enter Room Number to Search:");
         if (roomNumber == null || roomNumber.trim().isEmpty()) return;
+        roomNumber = roomNumber.trim();
 
         boolean found = false;
         try (BufferedReader br = new BufferedReader(new FileReader("rooms.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.startsWith("Room Number: " + roomNumber)) {
+                if (Validate.fieldIs(line, "Room Number", roomNumber)) {
                     JOptionPane.showMessageDialog(frame, line, "Room Found", JOptionPane.INFORMATION_MESSAGE);
                     found = true;
                     break;
@@ -170,6 +171,10 @@ public class Room {
                 JOptionPane.showMessageDialog(frame, "Room Number and Price are required!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            if (Validate.existsInFile("rooms.txt", "Room Number", roomNumber.trim())) {
+                JOptionPane.showMessageDialog(frame, "Room " + roomNumber.trim() + " already exists.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             if (!Validate.isAmount(price)) {
                 JOptionPane.showMessageDialog(frame, "Price must be a number.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -189,6 +194,12 @@ public class Room {
     private void deleteRoom() {
         String roomNumber = JOptionPane.showInputDialog(frame, "Enter Room Number to Delete:");
         if (roomNumber == null || roomNumber.trim().isEmpty()) return;
+        roomNumber = roomNumber.trim();
+        if (!Validate.existsInFile("rooms.txt", "Room Number", roomNumber)) {
+            JOptionPane.showMessageDialog(frame, "Room not found.", "Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (!Validate.confirm(frame, "room " + roomNumber)) return;
 
         List<String> updatedRooms = new ArrayList<>();
         boolean roomDeleted = false;
@@ -196,7 +207,7 @@ public class Room {
         try (BufferedReader br = new BufferedReader(new FileReader("rooms.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (!line.startsWith("Room Number: " + roomNumber)) {
+                if (!Validate.fieldIs(line, "Room Number", roomNumber)) {
                     updatedRooms.add(line);
                 } else {
                     roomDeleted = true;

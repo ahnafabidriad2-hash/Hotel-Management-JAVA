@@ -96,7 +96,9 @@ public class AdminLogin {
        String enteredPassword = new String(passwordField.getPassword());
 
               
-      if (enteredUsername.equals("admin") && enteredPassword.equals("admin123")) {
+      // age password code er vitore lekha chilo, ekhon admin.txt e thake tai change kora jay
+      String[] admin = readAdmin();
+      if (enteredUsername.trim().equals(admin[0]) && enteredPassword.equals(admin[1])) {
                    
       JOptionPane.showMessageDialog(frame, "Login Successful");
       new AdminDashboard();
@@ -120,16 +122,52 @@ public class AdminLogin {
       forgotPasswordButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
                 
-      JOptionPane.showMessageDialog(frame, "Forgot password functionality not implemented");
+      // recovery word mile gele notun password set kora jay
+      JTextField userField = new JTextField();
+      JTextField wordField = new JTextField();
+      JPasswordField newPassField = new JPasswordField();
+      JPanel form = new JPanel(new GridLayout(3, 2, 8, 8));
+      form.add(new JLabel("Username:"));
+      form.add(userField);
+      form.add(new JLabel("Recovery word:"));
+      form.add(wordField);
+      form.add(new JLabel("New password:"));
+      form.add(newPassField);
+      if (JOptionPane.showConfirmDialog(frame, form, "Reset Admin Password", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
+      String[] admin = readAdmin();
+      String newPass = new String(newPassField.getPassword());
+      if (!userField.getText().trim().equals(admin[0]) || !wordField.getText().trim().equalsIgnoreCase(admin[2])) {
+          JOptionPane.showMessageDialog(frame, "Username or recovery word is wrong.", "Error", JOptionPane.ERROR_MESSAGE);
+      } else if (newPass.length() < 4) {
+          JOptionPane.showMessageDialog(frame, "New password must be at least 4 characters.", "Error", JOptionPane.ERROR_MESSAGE);
+      } else {
+          try (java.io.PrintWriter w = new java.io.PrintWriter("admin.txt")) {
+              w.println(admin[0] + "," + newPass + "," + admin[2]);
+              JOptionPane.showMessageDialog(frame, "Password changed. You can log in now.");
+          } catch (java.io.IOException ex) {
+              JOptionPane.showMessageDialog(frame, "Could not save the new password.", "Error", JOptionPane.ERROR_MESSAGE);
+          }
+      }
        }
       });
 
         
     frame.setLocationRelativeTo(null);
-    frame.setVisible(true);
+    UI.show(frame);
     }
 
     public static void main(String[] args) {
         new AdminLogin();
+    }
+
+    // admin.txt: username,password,recovery word. file na thakle purono default ta
+    static String[] readAdmin() {
+        try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.FileReader("admin.txt"))) {
+            String[] p = r.readLine().split(",", 3);
+            if (p.length == 3) return new String[]{p[0].trim(), p[1].trim(), p[2].trim()};
+        } catch (Exception e) {
+            // file nai ba vul
+        }
+        return new String[]{"admin", "admin123", "hotel"};
     }
 }

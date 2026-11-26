@@ -176,6 +176,7 @@ class Registration {
                     UserStore.add(user);
                     JOptionPane.showMessageDialog(frame, "Registration successful! You can now log in with User Id " + userId + ".");
                     frame.dispose();
+                    Login.main(null);
                 } catch (IOException ioException) {
                     JOptionPane.showMessageDialog(frame, "Could not save your data.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -190,14 +191,15 @@ class Registration {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                frame.dispose(); 
+                frame.dispose();
+                Login.main(null); // back e login page e fire jay 
             }
         });
         panel.add(backButton);
 
         
         frame.getContentPane().add(panel);
-        frame.setVisible(true);
+        UI.show(frame);
     }
     public static void main(String[] args) {
         new Registration();

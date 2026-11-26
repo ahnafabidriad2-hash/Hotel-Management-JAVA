@@ -8,7 +8,7 @@ public class Login{
 
     public static void main(String[] args) {
         
-        JFrame frame = new JFrame("Hotel Management System");
+        JFrame frame = new JFrame("Login");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 400);
         frame.setLocationRelativeTo(null);
@@ -65,7 +65,7 @@ public class Login{
 
 
         JLabel accountLabel = new JLabel("Do you have an account?");
-        accountLabel.setBounds(50, 240, 150, 30);
+        accountLabel.setBounds(40, 240, 170, 30);
         panel.add(accountLabel);
 
         JButton registerButton = new JButton("Register");
@@ -76,7 +76,9 @@ public class Login{
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                        new Registration();             }
+                        frame.dispose();
+                        new Registration(); // login bondho kore registration, eki jaygay
+            }
         });
 
         JButton adminLoginButton = new JButton("Login (Admin)");
@@ -132,6 +134,6 @@ public class Login{
         passwordText.addActionListener(e -> loginButton.doClick());
   
         frame.getContentPane().add(panel);
-        frame.setVisible(true);
+        UI.show(frame);
     }
 }

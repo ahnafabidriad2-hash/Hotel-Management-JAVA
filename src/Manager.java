@@ -87,7 +87,7 @@ public class Manager {
 
         
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        UI.show(frame);
     }
 
     private static void openEmployeeFrame() {
@@ -147,7 +147,7 @@ public class Manager {
         });
 
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        UI.show(frame);
     }
 
     private static void openViewEmployeeFrame() {
@@ -157,27 +157,14 @@ public class Manager {
         frame.setLayout(new BorderLayout());
     
         
-        JTextArea textArea = new JTextArea();
+        // age manager er alada Employee.txt chilo, admin er employees.txt er shathe mil chilo na.
+        // ekhon duijon eki list dekhe
+        JTextArea textArea = new JTextArea(readFile("employees.txt", "No employees yet."));
         textArea.setEditable(false);
-    
-        String content = "";  
-    
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("Employee.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                content += line + "\n"; 
-            }
-            reader.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    
-        
-        textArea.setText(content);
-        frame.add(textArea, BorderLayout.CENTER);
+        frame.add(new JScrollPane(textArea), BorderLayout.CENTER);
+        frame.add(backBar(frame), BorderLayout.SOUTH);
         frame.setLocationRelativeTo(null);  
-        frame.setVisible(true);
+        UI.show(frame);
     }
     
 
@@ -237,10 +224,13 @@ public class Manager {
                 }
     
                 
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter("Employee.txt", true))) {
-                    writer.write("Name: " + name + ", Position: " + position + ", Salary: " + salary);
+                // admin er employee list er format e lekha, ID nijei porer number ta ney
+                int newId = nextEmployeeId();
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("employees.txt", true))) {
+                    writer.write("Name: " + name.trim() + ", Employee ID: " + newId + ", Position: " + position.trim()
+                            + ", Contact: -, Salary: " + salary.trim() + ", Age: -");
                     writer.newLine();
-                    JOptionPane.showMessageDialog(addEmployeeFrame, "Employee added successfully!");
+                    JOptionPane.showMessageDialog(addEmployeeFrame, "Employee added successfully! (ID " + newId + ")");
                 } catch (IOException ioException) {
                     JOptionPane.showMessageDialog(addEmployeeFrame, "Error saving employee data!");
                     ioException.printStackTrace();
@@ -253,8 +243,13 @@ public class Manager {
             }
         });
     
-        addEmployeeFrame.setLocationRelativeTo(null); 
-        addEmployeeFrame.setVisible(true);
+        JButton addBackButton = new JButton("Back");
+        addBackButton.setBounds(150, 220, 150, 35);
+        addBackButton.addActionListener(ev -> addEmployeeFrame.dispose());
+        addEmployeeFrame.add(addBackButton);
+
+        addEmployeeFrame.setLocationRelativeTo(null);
+        UI.show(addEmployeeFrame);
     }
     private static void openCustomerFrame() {
         JFrame frame = new JFrame("Customer Dashboard");
@@ -332,7 +327,9 @@ public class Manager {
             bookingPanel.add(checkOutDateLabel);
             bookingPanel.add(checkOutDateField);
     
-            JOptionPane.showMessageDialog(frame, bookingPanel, "Enter Booking Details", JOptionPane.PLAIN_MESSAGE);
+            // age OK chara option chilo na, ekhon Cancel chaple booking hoy na
+            if (JOptionPane.showConfirmDialog(frame, bookingPanel, "Enter Booking Details", JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION) return;
     
             
             String guestName = guestNameField.getText();
@@ -345,12 +342,39 @@ public class Manager {
 
             if (guestName.isEmpty() || mobileNumber.isEmpty() || roomNumber.isEmpty() || roomType.isEmpty() || checkInDate.isEmpty() || checkOutDate.isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "All fields must be filled!");
-            } else {
+                return;
+            }
+            // online booking er moto eikhaneo number, room type ar date check
+            if (!Validate.isPhone(mobileNumber.trim())) {
+                JOptionPane.showMessageDialog(frame, "Mobile number must be 11 digits and start with 01.");
+                return;
+            }
+            int price = RoomBookingGUI.priceFor(roomType);
+            if (price < 0) {
+                JOptionPane.showMessageDialog(frame, "Room type must be Single or Double.");
+                return;
+            }
+            java.time.LocalDate in, out;
+            try {
+                in = java.time.LocalDate.parse(checkInDate.trim());
+                out = java.time.LocalDate.parse(checkOutDate.trim());
+            } catch (java.time.format.DateTimeParseException ex) {
+                JOptionPane.showMessageDialog(frame, "Dates must look like 2026-12-31.");
+                return;
+            }
+            if (!out.isAfter(in)) {
+                JOptionPane.showMessageDialog(frame, "Check-out must be after check-in.");
+                return;
+            }
+            long nights = java.time.temporal.ChronoUnit.DAYS.between(in, out);
+            long total = nights * price;
+            {
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter("Booking.txt", true))) {
-                    writer.write("Guest Name: " + guestName + ", Mobile Number: " + mobileNumber + ", Room Number: " + roomNumber + 
-                                 ", Room Type: " + roomType + ", Check-In: " + checkInDate + ", Check-Out: " + checkOutDate);
+                    // dam o save hoy, jate revenue te walk-in booking er taka o gona hoy
+                    writer.write("Guest Name: " + guestName.trim() + ", Mobile Number: " + mobileNumber.trim() + ", Room Number: " + roomNumber.trim() +
+                                 ", Room Type: " + roomType.trim() + ", Check-In: " + in + ", Check-Out: " + out + ", Nights: " + nights + ", Total: " + total);
                     writer.newLine();
-                    JOptionPane.showMessageDialog(frame, "Room booked successfully!");
+                    JOptionPane.showMessageDialog(frame, "Room booked successfully! Total: BDT " + total);
                 } catch (IOException ioException) {
                     JOptionPane.showMessageDialog(frame, "Error booking the room.");
                     ioException.printStackTrace();
@@ -363,17 +387,10 @@ public class Manager {
     viewBookedRoomButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
+            // age shudhu manager er booking dekhato, customer der online booking o ekhane ase
             StringBuilder content = new StringBuilder();
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader("Booking.txt"));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    content.append(line).append("\n");  
-                }
-                reader.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            content.append("WALK-IN BOOKINGS (made by manager)\n").append(readFile("Booking.txt", "None\n"));
+            content.append("\nONLINE BOOKINGS (made by customers)\n").append(readFile(RoomBookingGUI.BOOKING_FILE, "None\n"));
                 JTextArea contentArea = new JTextArea();
             contentArea.setText(content.toString());
             contentArea.setBounds(50, 10, 800, 250);  
@@ -400,7 +417,7 @@ public class Manager {
                 }
             });
      viewBookedRoomFrame.setLocationRelativeTo(null);  
-     viewBookedRoomFrame.setVisible(true);                                                                                                                        
+     UI.show(viewBookedRoomFrame);                                                                                                                        
         }
     });
     
@@ -420,7 +437,7 @@ public class Manager {
             try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    if (line.contains("Mobile Number: " + cancelMobileNumber)) {
+                    if (Validate.fieldIs(line, "Mobile Number", cancelMobileNumber)) {
                         found = true; 
                     } else {
                         fileContents.append(line).append(System.lineSeparator());
@@ -432,6 +449,7 @@ public class Manager {
                 return;
             }
 
+            if (found && !Validate.confirm(frame, "the booking for " + cancelMobileNumber.trim())) return;
             if (found) {
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(inputFile))) {
                     writer.write(fileContents.toString());
@@ -457,7 +475,7 @@ public class Manager {
     });
     
     frame.setLocationRelativeTo(null);
-    frame.setVisible(true);
+    UI.show(frame);
     }
 
     private static void openRoomFrame() {
@@ -496,14 +514,30 @@ public class Manager {
         viewRoomButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(frame, "View Room functionality triggered");
+                showText(frame, "All Rooms", readFile("rooms.txt", "No rooms added yet."));
             }
         });
     
         monitorRoomButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(frame, "Monitor Room functionality triggered");
+                // customer thakle room bhora, "no" ba faka hole khali
+                StringBuilder busy = new StringBuilder(), free = new StringBuilder();
+                int busyCount = 0, freeCount = 0;
+                for (String line : readFile("rooms.txt", "").split("\n")) {
+                    if (line.isBlank()) continue;
+                    String room = Validate.field(line, "Room Number");
+                    String guest = Validate.field(line, "Customer");
+                    if (guest == null || guest.isEmpty() || guest.equalsIgnoreCase("no")) {
+                        free.append("  Room ").append(room).append("\n");
+                        freeCount++;
+                    } else {
+                        busy.append("  Room ").append(room).append(" - ").append(guest).append("\n");
+                        busyCount++;
+                    }
+                }
+                showText(frame, "Room Status", "Occupied: " + busyCount + "   Available: " + freeCount + "\n\nOCCUPIED\n"
+                        + (busyCount == 0 ? "  None\n" : busy) + "\nAVAILABLE\n" + (freeCount == 0 ? "  None\n" : free));
             }
         });
     
@@ -515,7 +549,7 @@ public class Manager {
         });
     
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        UI.show(frame);
     }
     
        private static void openReviewFrame() {
@@ -601,7 +635,14 @@ public class Manager {
         public void actionPerformed(ActionEvent e) {
             String selectedReview = (String) reviewsComboBox.getSelectedItem();             String feedback = feedbackArea.getText();
             if (selectedReview != null && !feedback.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "Feedback sent for: \n" + selectedReview + "\n\nFeedback: " + feedback);
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("feedback.txt", true))) {
+                    writer.write("Review: " + selectedReview.replace("\n", " ") + " | Reply: " + feedback.trim().replaceAll("\\s+", " "));
+                    writer.newLine();
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(frame, "Could not save the feedback.");
+                    return;
+                }
+                JOptionPane.showMessageDialog(frame, "Feedback saved for: \n" + selectedReview + "\n\nFeedback: " + feedback);
                 feedbackArea.setText("");
             } else {
                 JOptionPane.showMessageDialog(frame, "Please select a review and enter feedback before submitting.");
@@ -610,8 +651,53 @@ public class Manager {
     });
     
     frame.setLocationRelativeTo(null);
-    frame.setVisible(true);
+    UI.show(frame);
     
         }
     
+
+    // file er sob line ekshathe, file na thakle ba faka hole "empty" text
+    static String readFile(String file, String empty) {
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.isBlank()) sb.append(line).append("\n");
+            }
+        } catch (IOException ex) {
+            // file nai
+        }
+        return sb.length() == 0 ? empty : sb.toString();
+    }
+
+    // lomba text scroll kore dekhar dialog
+    static void showText(Component parent, String title, String text) {
+        JTextArea area = new JTextArea(text, 15, 60);
+        area.setEditable(false);
+        area.setFont(new Font(UI.FONT, Font.PLAIN, 14));
+        JOptionPane.showMessageDialog(parent, new JScrollPane(area), title, JOptionPane.PLAIN_MESSAGE);
+    }
+
+    // window er nicher dike ekta Back button
+    static JPanel backBar(JFrame frame) {
+        JPanel bar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton back = new JButton("Back");
+        back.addActionListener(e -> frame.dispose());
+        bar.add(back);
+        return bar;
+    }
+
+    // sobcheye boro employee ID er porer ta
+    static int nextEmployeeId() {
+        int max = 0;
+        for (String line : readFile("employees.txt", "").split("\n")) {
+            String id = Validate.field(line, "Employee ID");
+            try {
+                if (id != null) max = Math.max(max, Integer.parseInt(id));
+            } catch (NumberFormatException e) {
+                // number na hole bad
+            }
+        }
+        return max + 1;
+    }
 }
